@@ -13,6 +13,7 @@ render(
     tilesUrl='https://raw.githubusercontent.com/dev3map/tiles/master/world/'
     claimsUrl='https://raw.githubusercontent.com/dev3map/data/master/claims.json'
     citiesUrl='https://raw.githubusercontent.com/dev3map/data/master/cities.json'
+    transitUrl='https://raw.githubusercontent.com/dev3map/data/master/transit.json'
   />,
   document.getElementById('app')
 );

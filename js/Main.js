@@ -13,6 +13,7 @@ import IconClose from 'material-ui/svg-icons/navigation/close';
 import IconHelp from 'material-ui/svg-icons/action/help';
 import IconMenu from 'material-ui/svg-icons/navigation/menu';
 import IconPlace from 'material-ui/svg-icons/maps/place';
+import IconTrain from 'material-ui/svg-icons/maps/train';
 
 import AppBar from 'material-ui/AppBar';
 import AutoComplete from 'material-ui/AutoComplete';
@@ -30,6 +31,7 @@ import Toggle from 'material-ui/Toggle';
 import * as Util from './Util';
 import {WaypointsDialog, WaypointsOverlay} from './Waypoints';
 import {ClaimsDrawerContent, EditableClaim} from './Claims';
+import {buildTransitData, mapAllStationsSorted, TransitEdge, TransitStation} from './Transit';
 
 L.Icon.Default.imagePath = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.3/images/';
 
@@ -122,12 +124,17 @@ export default class Main extends Component {
       showBorder: false,
       showClaims: true,
       showCities: false,
+      showTransit: false,
       showWaypoints: true,
       showTerrain: true,
       // map data
       mapView: Util.hashToView(location.hash), // read only! TODO feedback loop onmoveend <-> setState
       cursorPos: L.latLng(0,0),
       claims: [],
+      transit: {
+        stations: {},
+        edges: [],
+      },
       cities: [],
       waypoints: [],
     };
@@ -136,6 +143,9 @@ export default class Main extends Component {
   componentWillMount() {
     Util.getJSON(this.props.claimsUrl, claims => {
       this.setState({claims: claims});
+    });
+    Util.getJSON(this.props.transitUrl, transitJson => {
+      this.setState({transit: buildTransitData(transitJson)});
     });
     Util.getJSON(this.props.citiesUrl, citiesJson => {
       this.setState({cities: citiesJson});
@@ -183,6 +193,13 @@ export default class Main extends Component {
         primaryText={c.name}
         onTouchTap={() => this.map.flyTo([c.location[1], c.location[0]], 1)}
       />,
+    }})).concat(Util.mapObj(this.state.transit.stations, s => { return {
+      text: s.name,
+      value: <MenuItem
+        leftIcon={<IconTrain />}
+        primaryText={s.name}
+        onTouchTap={() => this.map.flyTo([s.pos[2], s.pos[0]], 3)}
+      />,
     }})).concat(this.state.waypoints.map(w => { return {
       text: w.name,
       value: <MenuItem
@@ -206,7 +223,7 @@ export default class Main extends Component {
           >
             <div className='menu-inset'>
               <AutoComplete fullWidth openOnFocus
-                hintText="Find a claim, waypoint, ..."
+                hintText="Search everything"
                 filter={AutoComplete.fuzzyFilter}
                 dataSource={this.getSearchableData()}
               />
@@ -246,6 +263,11 @@ export default class Main extends Component {
                 label="Cities"
                 toggled={this.state.showCities}
                 onToggle={() => this.setState({showCities: !this.state.showCities})}
+              />
+              <CustomToggle
+                label="Transit"
+                toggled={this.state.showTransit}
+                onToggle={() => this.setState({showTransit: !this.state.showTransit})}
               />
               <CustomToggle
                 label="Terrain"
@@ -359,6 +381,20 @@ export default class Main extends Component {
                 <CityArea
                   key={i}
                   city={city}
+                />
+              )}
+
+              { this.state.showTransit && this.state.transit.edges.map((edge, i) =>
+                <TransitEdge
+                  key={i}
+                  edge={edge}
+                />
+              )}
+
+              { this.state.showTransit && mapAllStationsSorted(this.state.transit.stations, station =>
+                <TransitStation
+                  key={station.name}
+                  station={station}
                 />
               )}
 
