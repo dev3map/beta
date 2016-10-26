@@ -7,6 +7,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import IconArrFwd from 'material-ui/svg-icons/navigation/arrow-forward';
+import IconCity from 'material-ui/svg-icons/action/account-balance';
 import IconClaim from 'material-ui/svg-icons/social/public';
 import IconClose from 'material-ui/svg-icons/navigation/close';
 import IconHelp from 'material-ui/svg-icons/action/help';
@@ -76,6 +77,37 @@ class CustomToggle extends Component {
   }
 }
 
+export class CityArea extends Component {
+  render() {
+    var city = this.props.city;
+    var unsure = city.name[0] == "?";
+
+    var style = {
+      color: "#0f0",
+      stroke: 0,
+      fillOpacity: .5,
+    };
+    if (!city.size) {
+      style.color = "#ff0";
+      style.dashArray = [20];
+      style.stroke = 2;
+    }
+    if (unsure) style.color = "#f00";
+
+    return <RL.Circle
+      center={Util.xz.apply(null, city.location)}
+      radius={city.size || 42}
+      {...style}
+    >
+      <RL.Popup><span>
+        {city.name || "unnamed"}
+        <br />
+        {!city.size ? null : '(size '+city.size+')'} {''+city.location}
+      </span></RL.Popup>
+    </RL.Circle>;
+  }
+}
+
 export default class Main extends Component {
   constructor(props, context) {
     super(props, context);
@@ -89,12 +121,14 @@ export default class Main extends Component {
       // map state
       showBorder: false,
       showClaims: true,
+      showCities: false,
       showWaypoints: true,
       showTerrain: true,
       // map data
       mapView: Util.hashToView(location.hash), // read only! TODO feedback loop onmoveend <-> setState
       cursorPos: L.latLng(0,0),
       claims: [],
+      cities: [],
       waypoints: [],
     };
   }
@@ -102,6 +136,9 @@ export default class Main extends Component {
   componentWillMount() {
     Util.getJSON(this.props.claimsUrl, claims => {
       this.setState({claims: claims});
+    });
+    Util.getJSON(this.props.citiesUrl, citiesJson => {
+      this.setState({cities: citiesJson});
     });
   }
 
@@ -139,7 +176,14 @@ export default class Main extends Component {
           this.map.flyToBounds(bounds);
         }}
       />,
-    }}).concat(this.state.waypoints.map(w => { return {
+    }}).concat(this.state.cities.map(c => { return {
+      text: c.name,
+      value: <MenuItem
+        leftIcon={<IconCity />}
+        primaryText={c.name}
+        onTouchTap={() => this.map.flyTo([c.location[1], c.location[0]], 1)}
+      />,
+    }})).concat(this.state.waypoints.map(w => { return {
       text: w.name,
       value: <MenuItem
         leftIcon={<IconPlace />}
@@ -197,6 +241,11 @@ export default class Main extends Component {
                 label="Claims"
                 toggled={this.state.showClaims}
                 onToggle={() => this.setState({showClaims: !this.state.showClaims})}
+              />
+              <CustomToggle
+                label="Cities"
+                toggled={this.state.showCities}
+                onToggle={() => this.setState({showCities: !this.state.showCities})}
               />
               <CustomToggle
                 label="Terrain"
@@ -303,6 +352,13 @@ export default class Main extends Component {
                       editedClaimId: claimId,
                     });
                   }}
+                />
+              )}
+
+              { this.state.showCities && this.state.cities.map((city, i) =>
+                <CityArea
+                  key={i}
+                  city={city}
                 />
               )}
 

@@ -12,6 +12,7 @@ render(
     attribution='<a href="https://github.com/dev3map/dev3map.github.io">dev3map.github.io</a>'
     tilesUrl='https://raw.githubusercontent.com/dev3map/tiles/master/world/'
     claimsUrl='https://raw.githubusercontent.com/dev3map/data/master/claims.json'
+    citiesUrl='https://raw.githubusercontent.com/dev3map/data/master/cities.json'
   />,
   document.getElementById('app')
 );
