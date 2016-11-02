@@ -22,8 +22,15 @@ export function buildTransitData(json) {
   }
 
   json.edges.map(edge => {
-    edge.from && stations[edge.from].edges.push(edge);
-    edge.to   && stations[edge.to  ].edges.push(edge);
+    if (edge.from && !stations[edge.from])
+      return console.error('unknown "from" station in edge', edge);
+    if (edge.to && !stations[edge.to])
+      return console.error('unknown "to" station in edge', edge);
+
+    if (edge.from)
+      stations[edge.from].edges.push(edge);
+    if (edge.to)
+      stations[edge.to].edges.push(edge);
   });
 
   for (var stationName in stations) {
