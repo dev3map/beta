@@ -22,15 +22,16 @@ export function buildTransitData(json) {
   }
 
   json.edges.map(edge => {
-    if (edge.from && !stations[edge.from])
-      return console.error('unknown "from" station in edge', edge);
-    if (edge.to && !stations[edge.to])
-      return console.error('unknown "to" station in edge', edge);
-
-    if (edge.from)
-      stations[edge.from].edges.push(edge);
-    if (edge.to)
-      stations[edge.to].edges.push(edge);
+    if (edge.from) {
+      if (stations[edge.from])
+        stations[edge.from].edges.push(edge);
+      else console.error('unknown station in edge.from', edge);
+    }
+    if (edge.to) {
+      if (stations[edge.to])
+        stations[edge.to].edges.push(edge);
+      else console.error('unknown station in edge.to', edge);
+    }
   });
 
   for (var stationName in stations) {
@@ -78,7 +79,7 @@ export class TransitEdge extends Component {
       {...style}
     >
         <RL.Popup><span>
-          {edge.type} rail with {
+          {edge.type} with {
             edge.tracks ? edge.tracks : 'no'
           } {edge.tracks != 1 ? 'tracks' : 'track'}
           <br />
