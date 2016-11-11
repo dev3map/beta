@@ -191,21 +191,21 @@ export default class Main extends Component {
       value: <MenuItem
         leftIcon={<IconCity />}
         primaryText={c.name}
-        onTouchTap={() => this.map.flyTo([c.location[1], c.location[0]], 1)}
+        onTouchTap={() => this.map.flyTo([c.location[1], c.location[0]], .5)}
       />,
     }})).concat(Util.mapObj(this.state.transit.stations, s => { return {
       text: s.name,
       value: <MenuItem
         leftIcon={<IconTrain />}
         primaryText={s.name}
-        onTouchTap={() => this.map.flyTo([s.pos[2], s.pos[0]], 3)}
+        onTouchTap={() => this.map.flyTo([s.pos[2], s.pos[0]], .5)}
       />,
     }})).concat(this.state.waypoints.map(w => { return {
       text: w.name,
       value: <MenuItem
         leftIcon={<IconPlace />}
         primaryText={w.name}
-        onTouchTap={() => this.map.flyTo(Util.xz(w.x, w.z), 3)}
+        onTouchTap={() => this.map.flyTo(Util.xz(w.x, w.z), .5)}
       />,
     }}));
   }
