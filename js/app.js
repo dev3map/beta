@@ -14,6 +14,15 @@ render(
     claimsUrl='https://raw.githubusercontent.com/dev3map/data/master/claims.json'
     citiesUrl='https://raw.githubusercontent.com/dev3map/data/master/cities.json'
     transitUrl='https://raw.githubusercontent.com/dev3map/data/master/transit.json'
+    basemaps={[
+      'day',
+      'night',
+      'simple',
+      'light',
+    ]}
+    options={{
+      basemap: 'day',
+    }}
   />,
   document.getElementById('app')
 );
